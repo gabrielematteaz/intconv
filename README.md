@@ -3,8 +3,9 @@ A simple utility for converting values from one base to another.<br>
 By default, it converts values from decimal (also accepts "+" and "-" characters) to uppercase hexadecimal
 
 ## Options
-- 'f' = From
-- 't' = To
+- 'f' = From base
+- 't' = To base
+- 'l' = Lowercase output
 
 ## Other
 Minimum base supported: 2<br>

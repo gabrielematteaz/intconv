@@ -1,73 +1,63 @@
-#include "mttopt.h"
-#include "mttstr.h"
+#include "../mttlib/mttopt/mttopt.h"
+#include "../mttlib/mttstr/mttstr.h"
 #include <stdlib.h>
 #include <stdio.h>
 
 int main(int argc, char *argv[])
 {
-	struct mttopt_opt_t opts[] = {
-		'f', 0, NULL,
-		't', 0, NULL,
-	};
+	struct mttopt_opt_t optv[] = { { 'f', HAS_ARG, NOT_FOUND, NULL }, { 't', HAS_ARG, 0, NULL }, { 'l', 0, 0 } };
+	struct mttstr_fmt_t fmtopt = { '+', '-', .base = 10, .fill_mode = 0 }, fmtfrom = { .fill_mode = 0 }, fmtto = { .plus = 0, .fill_mode = 0, .flags = NULL_TERM, .width = 0 };
+	char *fstr, **av, *arg;
+	int argvoff = mttopt_extract_optv(argc, argv, sizeof(optv) / sizeof(*optv), optv);
+	size_t ival;
 
-	char **args = argv + 1, **as = args + mttopt_exctr_opts(argc - 1, args, 2, opts), *arg, *fstr;
-	struct mttstr_fmt_t optfmt, ftivfmt, ivtffmt;
-	size_t frombase, tobase, ival, fstrsize;
+	fmtfrom.base = mttstr_fstr_to_ival(optv[0].arg, NULL, fmtopt);
 
-	optfmt.plusc = '+';
-	optfmt.minusc = '-';
-	optfmt.base = 10;
-	optfmt.fill_mode = no_fill;
-	optfmt.flags = 0;
-	frombase = opts[0].arg == NULL ? 10 : mttstr_fstr_to_ival(opts[0].arg, NULL, optfmt);
-	tobase = opts[1].arg == NULL ? 16 : mttstr_fstr_to_ival(opts[1].arg, NULL, optfmt);
-	ftivfmt.fill_mode = no_fill;
-	ivtffmt.plusc = 0;
-	ivtffmt.fill_mode = 0;
-	ivtffmt.flags = FMT_FLAGS_NULL_TERM;
-	ivtffmt.width = 0;
-	arg = *as;
-
-	if (frombase < 2 || frombase == 10 || frombase > 36)
+	if (fmtfrom.base < 2 || fmtfrom.base == 10 || fmtfrom.base > 36)
 	{
-		ftivfmt.plusc = '+';
-		ftivfmt.minusc = '-';
-		ftivfmt.base = 10;
-		ftivfmt.flags = 0;
+		fmtfrom.plus = '+';
+		fmtfrom.minus = '-';
+		fmtfrom.base = 10;
 	}
 	else
 	{
-		ftivfmt.plusc = 0;
-		ftivfmt.minusc = 0;
-		ftivfmt.base = frombase;
-		ftivfmt.flags = FMT_FLAGS_MCASE;
+		fmtfrom.plus = 0;
+		fmtfrom.minus = 0;
+		fmtfrom.flags = MCASE;
 	}
 
-	if (tobase < 2 || tobase > 36)
-	{
-		ivtffmt.minusc = 0;
-		ivtffmt.base = 16;
-	}
-	else
-	{
-		ivtffmt.minusc = tobase == 10 ? '-' : 0;
-		ivtffmt.base = tobase;
-	}
+	fmtto.base = mttstr_fstr_to_ival(optv[1].arg, NULL, fmtopt);
 
-	while (arg != NULL)
+	if (fmtto.base < 2 || fmtto.base > 36)
 	{
-		as++;
-		ival = mttstr_fstr_to_ival(arg, NULL, ftivfmt);
-		arg = *as;
-		fstrsize = mttstr_ival_to_fstr(NULL, ival, ivtffmt);
-		fstr = malloc(fstrsize + 1);
+		fmtto.minus = 0;
+		fmtto.base = 16;
+	}
+	else fmtto.minus = fmtto.base == 10 ? '-' : 0;
 
-		if (fstr)
+	if (optv[2].status == FOUND) fmtto.flags |= LCASE;
+
+	fmtto.width = mttstr_ival_to_fstr(NULL, ~0, fmtto);
+	fstr = malloc(fmtto.width + 1);
+
+	if (fstr != NULL)
+	{
+		fmtto.width = 0;
+		av = argv + argvoff;
+
+		while (1)
 		{
-			mttstr_ival_to_fstr(fstr, ival, ivtffmt);
+			arg = *av;
+
+			if (arg == NULL) break;
+
+			ival = mttstr_fstr_to_ival(arg, NULL, fmtfrom);
+			mttstr_ival_to_fstr(fstr, ival, fmtto);
 			puts(fstr);
-			free(fstr);
+			av++;
 		}
+
+		free(fstr);
 	}
 
 	return 0;

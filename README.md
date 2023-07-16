@@ -1,22 +1,20 @@
 # ival
-A simple utility for converting values from one base to another.<br>
-By default, it converts values from decimal (also accepts "+" and "-" characters) to uppercase hexadecimal
+A simple utility for converting values from one base to another
 
-## Options
+# Options
 - 'f' = From base
 - 't' = To base
-- 'l' = Lowercase output
+- 'u' = Unsigned output
 
 ## Other
 Minimum base supported: 2<br>
 Maximum base supported: 36
 
 # Example
-This example converts decimal to binary values
 ```shell
 ival -t 2 20
 ```
-## Output
+## Result (Example)
 ```shell
 10100
 ```

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 			if (fromfmt.base < 2 || fromfmt.base > 36) goto default_fromfmt;
 
-			if (fromfmt.base == 10)	goto signed_deciaml_fromfmt;
+			if (fromfmt.base == 10)	goto signed_decimal_fromfmt;
 
 			fromfmt.plus = 0;
 			fromfmt.minus = 0;
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 		{
 		default_fromfmt:
 			fromfmt.base = 10;
-		signed_deciaml_fromfmt:
+		signed_decimal_fromfmt:
 			fromfmt.plus = '+';
 			fromfmt.minus = '-';
 			fromfmt.flags = MCASE;

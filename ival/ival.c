@@ -8,59 +8,78 @@ int main(int argc, char *argv[])
 	struct mttopt_opt_t optv[] = {
 		{ 'f', 0, MUST_HAVE_ARG, 0 },
 		{ 't', 0, MUST_HAVE_ARG, 0 },
-		{ 'u', IGNORE_COPIES, HAS_NO_ARG, 0 },
+		{ 'u', IGNORE_COPIES, 0, 0 }
 	};
 
-	int avoff, frombase, fromplus, fromminus, fromflags, tobase, tominus;
-	size_t width, ival;
+	int avoff = mttopt_extract_optv(argc, argv, sizeof(optv) / sizeof(*optv), optv);
+	struct mttstr_fmt_t optfmt = { '+', '-', ' ', 10, 0, 0 }, tofmt, fromfmt;
+	size_t maxival, ival;
 	char *fstr, **av, *arg;
-	
-	avoff = mttopt_extract_optv(argc, argv, sizeof(optv) / sizeof(*optv), optv);
-	frombase = mttstr_fstr_to_ival(optv[0].arg, NULL, 10, '+', '-', ' ', LEFT, 0);
 
-	if (frombase < 2 || frombase > 36) frombase = 10;
-
-	if (frombase == 10)
+	if (optv[1].status == FOUND)
 	{
-		fromplus = '+';
-		fromminus = '-';
-		fromflags = 0;
+		tofmt.base = mttstr_fstr_to_ival(optv[1].arg, NULL, optfmt);
+
+		if (tofmt.base < 2 || tofmt.base > 36) goto default_tofmt;
+
+		if (tofmt.base == 10 && optv[2].status == NOT_FOUND)
+		{
+			tofmt.minus = '-';
+			tofmt.flags = NULL_TERM;
+			maxival = (size_t)1 << (sizeof(size_t) * CHAR_BIT - 1);
+		}
+		else goto not_signed_decimal_tofmt;
 	}
 	else
 	{
-		fromplus = 0;
-		fromminus = 0;
-		fromflags = MCASE;	
+	default_tofmt:
+		tofmt.base = 16;
+	not_signed_decimal_tofmt:
+		tofmt.minus = 0;
+		tofmt.flags = NULL_TERM;
+		maxival = -1;
 	}
 
-	tobase = mttstr_fstr_to_ival(optv[1].arg, NULL, 10, '+', '-', ' ', LEFT, 0);
-
-	if (tobase < 2 || tobase > 36) tobase = 16;
-
-	if (tobase == 10 && optv[2].status == NOT_FOUND)
-	{
-		tominus = '-';
-		width = mttstr_ival_to_fstr(NULL, ((size_t)1 << (sizeof(size_t) * CHAR_BIT - 1)), 10, '+', '-', 0, 0, 0, 0);
-	}
-	else
-	{
-		tominus = 0;
-		width = mttstr_ival_to_fstr(NULL, ~0, tobase, 0, 0, 0, 0, 0, 0);
-	}
-
-	fstr = malloc(width + 1);
+	tofmt.plus = 0;
+	tofmt.fillmode = 0;
+	tofmt.width = 0;
+	tofmt.width = mttstr_ival_to_fstr(NULL, maxival, tofmt);
+	fstr = malloc(tofmt.width + 1);
 
 	if (fstr != NULL)
 	{
+		if (optv[0].status == FOUND)
+		{
+			fromfmt.base = mttstr_fstr_to_ival(optv[0].arg, NULL, optfmt);
+
+			if (fromfmt.base < 2 || fromfmt.base > 36) goto default_fromfmt;
+
+			if (fromfmt.base == 10)	goto signed_deciaml_fromfmt;
+
+			fromfmt.plus = 0;
+			fromfmt.minus = 0;
+		}
+		else
+		{
+		default_fromfmt:
+			fromfmt.base = 10;
+		signed_deciaml_fromfmt:
+			fromfmt.plus = '+';
+			fromfmt.minus = '-';
+			fromfmt.flags = MCASE;
+		}
+
+		fromfmt.fill = ' ';
+		fromfmt.fillmode = 0;
 		av = argv + avoff;
 		arg = *av;
 
 		while (arg != NULL)
 		{
-			ival = mttstr_fstr_to_ival(arg, NULL, frombase, fromplus, fromminus, ' ', LEFT, fromflags);
-			mttstr_ival_to_fstr(fstr, ival, tobase, 0, tominus, ' ', LEFT, width, NULL_TERM);
-			puts(fstr);
 			av++;
+			ival = mttstr_fstr_to_ival(arg, NULL, fromfmt);
+			mttstr_ival_to_fstr(fstr, ival, tofmt);
+			puts(fstr);
 			arg = *av;
 		}
 

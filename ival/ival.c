@@ -5,9 +5,9 @@
 int main(int argc, char *argv[])
 {
 	struct mttopt_opt_t optv[] = {
-		{ 'f', OPT_FLAGS_MUST_HAVE_ARG, 0 },
-		{ 't', OPT_FLAGS_MUST_HAVE_ARG, 0 },
-		{ 'u', OPT_FLAGS_HAS_NO_ARG, 0 },
+		{ 'f', OPT_FLAGS_MUST_HAVE_ARG, 0, NULL },
+		{ 't', OPT_FLAGS_MUST_HAVE_ARG, 0, NULL },
+		{ 'u', OPT_FLAGS_HAS_NO_ARG, 0, NULL },
 	};
 
 	char **av = argv + mttopt_extr_optv(argc, argv, 3, optv), **avc = argv + argc, fstr[64 + 1];

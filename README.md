@@ -5,6 +5,7 @@ A simple utility for converting values from one base to another
 - 'f' = From base
 - 't' = To base
 - 'u' = Unsigned output
+- 'l' = Lowercase output
 
 ## Other
 Minimum base supported: 2<br>

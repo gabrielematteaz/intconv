@@ -1,63 +1,34 @@
-#include "mtt/cmdline.h"
+#include "mtt/cmd_line.h"
 #include "mtt/str.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[])
 {
-	struct mtt_cmdline_opt_t optv[] = {
-		{ 'f', REQUIRED_ARG },
-		{ 's', NO_ARG },
-		{ 'l', NO_ARG },
-		{ 't', REQUIRED_ARG }
+	struct mtt_opt_t optv[] = {
+		{ 'f', OPT_REQUIRED_ARG, NULL },
+		{ 's', OPT_NO_ARG, NULL },
+		{ 't', OPT_REQUIRED_ARG, NULL },
+		{ 'l', OPT_NO_ARG, NULL }
 	};
 
-	struct mtt_str_fmt_t fromfmt = { '+', '-', ' ', 10, MIXED, LEFT }, tofmt = { 0, 0, ' ', .ltrcase = UPPER, LEFT, 0, 0 };
-	struct mtt_str_fmt_t optfmt = { '+', 0, ' ', 10, .fillmode = LEFT };
-
-	while (1)
-	{
-		struct mtt_cmdline_opt_t *opt = mtt_cmdline_extr_opt(argc, argv, 4,  optv);
-
-		if (opt == NULL) break;
-
-		int alias = opt->alias;
-
-		switch (alias)
-		{
-		case 'f':
-			fromfmt.base = mtt_str_fstr_to_ival(opt->arg, NULL, optfmt);
-
-			break;
-		case 's':
-			tofmt.minus = '-';
-
-			break;
-		case 'l':
-			tofmt.ltrcase = LOWER;
-
-			break;
-		case 't':
-			tofmt.base = mtt_str_fstr_to_ival(opt->arg, NULL, optfmt);
-
-			break;
-		}
-	}
+	char **av = argv + mtt_extr_optv(argc, argv, 4, optv);
+	struct mtt_fstr_to_ival_fmt_t optfmt = { '+', 0, ' ', 10, FMT_FILL_MODE_LEFT };
+	struct mtt_fstr_to_ival_fmt_t fromfmt = { '+', '-', ' ', mtt_fstr_to_ival(optv[0].arg, NULL, optfmt), FMT_FILL_MODE_LEFT | FSTR_TO_IVAL_FMT_LTR_CASE_MIXED };
 
 	if (fromfmt.base < 2 || fromfmt.base > 36) fromfmt.base = 10;
 
-	if (tofmt.base < 2 || tofmt.base > 36) tofmt.base = 16;
+	struct mtt_ival_to_fstr_fmt_t tofmt = { { 0, optv[1].arg ? '-' : 0, ' ', mtt_fstr_to_ival(optv[2].arg, NULL, optfmt), FMT_FILL_MODE_LEFT | (optv[3].arg ? FMT_LTR_CASE_LOWER : FMT_LTR_CASE_UPPER) }, 0 };
 
-	char **av = not_opt, **avc = argv + argc;
+	if (tofmt.from.base < 2 || tofmt.from.base > 36) tofmt.from.base = 16;
+
+	char **avc = argv + argc;
 
 	while (av < avc)
 	{
-		size_t ival = mtt_str_fstr_to_ival(*av, NULL, fromfmt);
-
-		av++;
-
 		char fstr[128];
 
-		mtt_str_ival_to_fstr(fstr, ival, tofmt);
+		mtt_ival_to_fstr(fstr, mtt_fstr_to_ival(*av, NULL, fromfmt), tofmt);
+		av++;
 		puts(fstr);
 	}
 

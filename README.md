@@ -4,7 +4,7 @@ A simple utility for converting values from one base to another
 # Options
 - 'f' = From base
 - 't' = To base
-- 'u' = Unsigned output
+- 's' = Signed output
 - 'l' = Lowercase output
 
 ## Other

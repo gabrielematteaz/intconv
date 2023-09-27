@@ -1,4 +1,4 @@
-# ival
+# ivconv
 A simple utility for converting values from one base to another
 
 # Options
@@ -13,7 +13,7 @@ Maximum base supported: 36
 
 # Example
 ```shell
-ival -t 2 20
+ivconv -t 2 20
 ```
 ## Result (Example)
 ```shell

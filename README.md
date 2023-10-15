@@ -1,4 +1,4 @@
-# ivconv
+# intconv
 A simple utility for converting values from one base to another
 
 # Options

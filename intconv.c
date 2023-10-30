@@ -5,10 +5,10 @@
 int main(int argc, char *argv[])
 {
 	struct mtt_opt_t optv[] = {
-		{ 'f', OPT_ARG_TYPE_REQUIRED, NULL },
-		{ 's', OPT_ARG_TYPE_NONE, NULL },
-		{ 't', OPT_ARG_TYPE_REQUIRED, NULL },
-		{ 'l', OPT_ARG_TYPE_NONE, NULL }
+		{ 'f', OPT_ARG_REQUIRED, NULL },
+		{ 's', OPT_ARG_NONE, NULL },
+		{ 't', OPT_ARG_REQUIRED, NULL },
+		{ 'l', OPT_ARG_NONE, NULL }
 	};
 
 	int i = mtt_extr_optv(argc, argv, sizeof(optv) / sizeof(optv[0]), optv);
